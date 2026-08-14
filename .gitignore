@@ -1,0 +1,25 @@
+# Secrets / environment
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+secrets.*
+credentials.*
+config.local.*
+
+# Exports pouvant contenir des secrets
+shuffle/*secret*
+shuffle/*credential*
+shuffle/*webhook*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log
+~$*
