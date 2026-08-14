@@ -1,0 +1,5 @@
+index=* EventCode=4625
+| rename "Adresse du réseau source" as source_ip
+| stats count by source_ip
+| where count > 50
+| sort - count
