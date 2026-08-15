@@ -1,116 +1,22 @@
-# SOC-SOAR-BruteForce-SMB
+# Captures de preuve
 
-Laboratoire SOC/SOAR consacré à la détection et à l'automatisation de la réponse à une attaque **Brute Force SMB**.
+Sélection de captures issues du laboratoire SOC/SOAR.
 
-## Objectif
+## Splunk
+- `01_event_4625_bruteforce_smb.jpg` — investigation des échecs Windows 4625 depuis `192.168.56.102`.
+- `02_pic_1429_evenements_0246.png` — pic de `1 429` événements observé à `02:46`.
+- `03_alerte_soc_4625_v2.png` — configuration de l'alerte `SOC-4625-BruteForce-SMB-v2`.
 
-Construire une chaîne de traitement de bout en bout :
+## Shuffle SOAR
+- `04_condition_ip_privee_startswith_192_168.png` — condition `source_ip startswith 192.168.`.
+- `05_workflow_shuffle_soar.jpg` — workflow Webhook → condition → Discord / VirusTotal.
+- `06_run_ip_publique_8_8_8_8.jpg` — run public avec `source_ip: 8.8.8.8` et `count: 25`.
 
-**Simulation SMB → Journaux Windows → Splunk → Détection SPL → Alerte V2 → Webhook → Shuffle SOAR → Décision IP privée/publique → VirusTotal si nécessaire → Discord → Dashboard SOC**
+## Discord
+- `07_alerte_ip_publique_virustotal.jpg` — notification publique enrichie VirusTotal (`Harmless: 53`).
+- `08_alerte_ip_privee_routage_direct.jpg` — notification privée `192.168.56.102 / 1429`, enrichissement ignoré.
 
-Le scénario s'appuie principalement sur les échecs d'authentification Windows **Event ID 4625**.
+## Dashboard
+- `09_dashboard_soc_final.png` — dashboard Splunk final avec `1 916` échecs d'authentification SMB.
 
-## Technologies
-
-- Splunk Enterprise — SIEM, recherche SPL, alerte et dashboard
-- Windows — machine cible et journaux de sécurité
-- Kali Linux — simulation de l'activité SMB dans le laboratoire
-- Shuffle SOAR — orchestration et logique conditionnelle
-- VirusTotal — enrichissement des adresses IP publiques
-- Discord — notification automatisée
-
-## Scénario observé
-
-La simulation génère des échecs d'authentification SMB sur la machine Windows. Splunk collecte les événements 4625 et permet d'identifier notamment :
-
-- une adresse IP source ;
-- le compte ciblé ;
-- le Logon Type 3 ;
-- le volume d'échecs d'authentification.
-
-Dans le test principal du laboratoire, l'adresse privée `192.168.56.102` a généré **1 429** échecs d'authentification.
-
-## Détection Splunk
-
-La règle utilisée dans le projet est nommée :
-
-`SOC-4625-BruteForce-SMB-v2`
-
-Elle exploite les événements Windows 4625, extrait l'adresse réseau source et compte les événements par IP.
-
-Voir : [`splunk/detection-bruteforce-smb.spl`](splunk/detection-bruteforce-smb.spl)
-
-## Automatisation SOAR
-
-L'alerte Splunk transmet les données à Shuffle via Webhook.
-
-Le workflow applique ensuite une logique conditionnelle :
-
-- **IP privée (`192.168.x.x`)** → notification Discord directe ;
-- **IP publique** → enrichissement VirusTotal → notification Discord.
-
-### Validation IP publique
-
-Test avec `8.8.8.8` :
-
-- Failed Logons : 25
-- Severity : HIGH
-- VirusTotal : Malicious 0 / Suspicious 0 / Harmless 53
-- Notification Discord générée après enrichissement.
-
-### Validation IP privée
-
-Test réel avec `192.168.56.102` :
-
-- Failed Logons : 1 429
-- Severity : HIGH
-- Adresse reconnue comme locale/privée
-- Enrichissement VirusTotal volontairement ignoré
-- Notification Discord directe.
-
-## Dashboard SOC
-
-Le dashboard Splunk **SOC - Dashboard Brute Force SMB** regroupe notamment :
-
-- le nombre total d'échecs Windows 4625 ;
-- l'évolution temporelle des échecs SMB ;
-- les principales adresses IP sources ;
-- les comptes les plus ciblés.
-
-## Structure du dépôt
-
-```text
-SOC-SOAR-BruteForce-SMB/
-├── README.md
-├── .gitignore
-├── SECURITY.md
-├── docs/
-├── splunk/
-├── shuffle/
-├── screenshots/
-│   ├── splunk/
-│   ├── shuffle/
-│   ├── discord/
-│   └── dashboard/
-└── presentation/
-```
-
-## Sécurité
-
-Ce dépôt ne contient volontairement **aucun secret** :
-
-- aucune clé API VirusTotal ;
-- aucune URL complète de Webhook Shuffle ;
-- aucun Webhook Discord ;
-- aucun token ;
-- aucun mot de passe ou identifiant.
-
-Les valeurs sensibles doivent être configurées localement et ne jamais être commitées.
-
-## Documentation
-
-Le rapport technique complet est disponible dans le dossier [`docs/`](docs/).
-
-## Statut
-
-Projet de laboratoire pédagogique — SOC / Blue Team — 2026.
+> Les secrets, clés API, mots de passe et URLs complètes de Webhook ne doivent jamais être publiés.
